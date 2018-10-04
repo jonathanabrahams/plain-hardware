@@ -1,0 +1,47 @@
+<?php return array (
+  0 => 
+  array (
+    'GET' => 
+    array (
+      '/users' => 'get_all_users_handler',
+    ),
+  ),
+  1 => 
+  array (
+    'GET' => 
+    array (
+      0 => 
+      array (
+        'regex' => '~^(?|/user/(\\d+)|/articles/(\\d+)()|/articles/(\\d+)/([^/]+)())$~',
+        'routeMap' => 
+        array (
+          2 => 
+          array (
+            0 => 'get_user_handler',
+            1 => 
+            array (
+              'id' => 'id',
+            ),
+          ),
+          3 => 
+          array (
+            0 => 'get_article_handler',
+            1 => 
+            array (
+              'id' => 'id',
+            ),
+          ),
+          4 => 
+          array (
+            0 => 'get_article_handler',
+            1 => 
+            array (
+              'id' => 'id',
+              'title' => 'title',
+            ),
+          ),
+        ),
+      ),
+    ),
+  ),
+);
