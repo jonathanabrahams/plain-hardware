@@ -1,0 +1,7 @@
+{
+    "name": "jonabr/plain-hardware",
+    "description": "www.plain-hardware.co.za",
+    "require": {
+        "nikic/fast-route": "^1.3"
+    }
+}
