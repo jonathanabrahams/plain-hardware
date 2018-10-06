@@ -4,30 +4,11 @@ define( 'APP_DIR', dirname(__DIR__));
 define( 'VENDOR_DIR', APP_DIR.'/vendor');
 define( 'VIEW_DIR', APP_DIR.'/view');
 
-// HTTP ERROR PAGE TEMPLATES
-define( 'HTTP_404', VIEW_DIR.'/error/404.html');
-define( 'HTTP_405', VIEW_DIR.'/error/405.html');
-define( 'HTTP_500', VIEW_DIR.'/error/500.html');
-
 // VENDORs
 require VENDOR_DIR.'/autoload.php';
 
 // ERROR HANDLER
-function AppErrorHandler($errno, $errstr, $errfile, $errline)
-{
-  switch( true )
-  {
-    case ($errno & E_ERROR) != 0 : $type = 'Error'; break;
-    case ($errno & E_WARNING ) != 0 : $type = 'Warning'; break;
-    case ($errno & E_PARSE ) != 0 : $type = 'Parse'; break;
-    case ($errno & E_NOTICE ) != 0 : $type = 'Notice'; break;
-    case ($errno & E_CORE_ERROR ) != 0 : $type = 'Core'; break;
-    default: $type = 'Unknown';
-  }
-  \App\Error::header(new \App\Error\Context('EH', $type, $errno, $errstr));
-  return true;
-}
-$old_error_handler = set_error_handler("AppErrorHandler");
+$old_error_handler = set_error_handler('\App\Error::handler');
 
 // DI
 try {
