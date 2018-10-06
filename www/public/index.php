@@ -1,12 +1,22 @@
 <?php require dirname(__DIR__).'/vendor/autoload.php';
+// DI
+$builder = (new \DI\ContainerBuilder())
+    ->useAutowiring(false)
+    ->useAnnotations(false)
+    ->enableCompilation(dirname(__DIR__).'/di.cache')
+    ->addDefinitions([
+        \App\Controller\Home::class => \DI\create(\App\Controller\Home::class)
+    ]);
+$app = $builder->build();
 
+// FastRoute
 $dispatcher = FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/users', 'App\Controller\Home@index');
     $r->addRoute('GET', '/user/{id:\d+}', 'App\Controller\Home@index');
     $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'App\Controller\Home@index');
 },[
-    'cacheFile' => __DIR__ . '/route.cache', /* required */
-    'cacheDisabled' => true, 
+    'cacheFile' => dirname(__DIR__) . '/route.cache', /* required */
+    'cacheDisabled' => false, 
 ]);
 
 $httpMethod = $_SERVER['REQUEST_METHOD'];
@@ -28,8 +38,8 @@ switch ($routeInfo[0]) {
         readfile(dirname(__DIR__).'/view/error/405.html');
         exit;
     case FastRoute\Dispatcher::FOUND:
-        list( $class, $method) = explode('@',$routeInfo[1]);
+        list($class, $method) = explode('@',$routeInfo[1]);
         $vars = $routeInfo[2];
-        echo (new $class())->index($vars);
+        $app->get($class)->$method($vars);
         break;
 }

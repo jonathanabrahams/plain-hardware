@@ -3,7 +3,7 @@
   array (
     'GET' => 
     array (
-      '/users' => 'get_all_users_handler',
+      '/users' => 'App\\Controller\\Home@index',
     ),
   ),
   1 => 
@@ -17,7 +17,7 @@
         array (
           2 => 
           array (
-            0 => 'get_user_handler',
+            0 => 'App\\Controller\\Home@index',
             1 => 
             array (
               'id' => 'id',
@@ -25,7 +25,7 @@
           ),
           3 => 
           array (
-            0 => 'get_article_handler',
+            0 => 'App\\Controller\\Home@index',
             1 => 
             array (
               'id' => 'id',
@@ -33,7 +33,7 @@
           ),
           4 => 
           array (
-            0 => 'get_article_handler',
+            0 => 'App\\Controller\\Home@index',
             1 => 
             array (
               'id' => 'id',
