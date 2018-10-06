@@ -11,9 +11,9 @@ $app = $builder->build();
 
 // FastRoute
 $dispatcher = FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/users', 'App\Controller\Home@index');
-    $r->addRoute('GET', '/user/{id:\d+}', 'App\Controller\Home@index');
-    $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'App\Controller\Home@index');
+    $r->get('/users', \App\Controller\Home::class.'@index');
+    $r->get('/user/{id:\d+}', \App\Controller\Home::class.'@index');
+    $r->get('/articles/{id:\d+}[/{title}]', \App\Controller\Home::class.'@index');
 },[
     'cacheFile' => dirname(__DIR__) . '/route.cache', /* required */
     'cacheDisabled' => false, 
