@@ -19,10 +19,10 @@ try {
     \App\Controller\Home::class => \DI\create(\App\Controller\Home::class),
     \App\Error::class => \DI\create(\App\Error::class)
   ]);
-  $builder->enableCompilation(dirname(__DIR__).'/di.cache');
+  $buildr->enableCompilation(dirname(__DIR__).'/di.cache');
   $app = $builder->build();
 }catch(Throwable $e) {
-  \App\Error::render(500, \App\Error\Context::thrown('DI', $e));
+  \App\Error::render(501, \App\Error\Context::thrown('DI', $e));
   exit;
 }
 
@@ -60,6 +60,6 @@ try {
       exit;
   }
 }catch(Throwable $e) {
-  \App\Error::render(501, \App\Error\Context::thrown('FR', $e));
+  \App\Error::render(500, \App\Error\Context::thrown('FR', $e));
   exit;
 }
