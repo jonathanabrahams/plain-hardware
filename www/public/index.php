@@ -1,8 +1,10 @@
 <?php 
-// DEFINE
+// DIRECTORY
 define( 'APP_DIR', dirname(__DIR__));
 define( 'VENDOR_DIR', APP_DIR.'/vendor');
 define( 'VIEW_DIR', APP_DIR.'/view');
+
+// HTTP ERROR PAGE TEMPLATES
 define( 'HTTP_404', VIEW_DIR.'/error/404.html');
 define( 'HTTP_405', VIEW_DIR.'/error/405.html');
 define( 'HTTP_500', VIEW_DIR.'/error/500.html');
@@ -10,23 +12,36 @@ define( 'HTTP_500', VIEW_DIR.'/error/500.html');
 // VENDORs
 require VENDOR_DIR.'/autoload.php';
 
+// ERROR HANDLER
+function AppErrorHandler($errno, $errstr, $errfile, $errline)
+{
+  switch( true )
+  {
+    case ($errno & E_ERROR) != 0 : $type = 'Error'; break;
+    case ($errno & E_WARNING ) != 0 : $type = 'Warning'; break;
+    case ($errno & E_PARSE ) != 0 : $type = 'Parse'; break;
+    case ($errno & E_NOTICE ) != 0 : $type = 'Notice'; break;
+    case ($errno & E_CORE_ERROR ) != 0 : $type = 'Core'; break;
+    default: $type = 'Unknown';
+  }
+  \App\Error::header(new \App\Error\Context('EH', $type, $errno, $errstr));
+  return true;
+}
+$old_error_handler = set_error_handler("AppErrorHandler");
+
 // DI
 try {
   $builder = (new \DI\ContainerBuilder())
   ->useAutowiring(false)
   ->useAnnotations(false)
-  // ->enableCompilation(dirname(__DIR__).'/di.cache')
   ->addDefinitions([
-    \App\Controller\Home::class => \DI\create(\App\Controller\Home::class)
+    \App\Controller\Home::class => \DI\create(\App\Controller\Home::class),
+    \App\Error::class => \DI\create(\App\Error::class)
   ]);
+  $builder->enableCompilation(dirname(__DIR__).'/di.cache');
   $app = $builder->build();
-}catch(Error $e) {
-  http_response_code(500);
-  readfile(HTTP_500);
-  exit;
-}catch(Exception $e){
-  http_response_code(500);
-  readfile(HTTP_500);
+}catch(Throwable $e) {
+  \App\Error::render(500, \App\Error\Context::thrown('DI', $e));
   exit;
 }
 
@@ -51,13 +66,11 @@ try {
   $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
   switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
-      http_response_code(404);
-      readfile(HTTP_404);
+      \App\Error::render(404);
       exit;
     case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
       $allowedMethods = $routeInfo[1];
-      http_response_code(405);
-      readfile(HTTP_405);
+      \App\Error::render(405);
       exit;
     case FastRoute\Dispatcher::FOUND:
       list($class, $method) = explode('@',$routeInfo[1]);
@@ -65,12 +78,7 @@ try {
       $app->get($class)->$method($vars);
       exit;
   }
-}catch(Error $e) {
-  http_response_code(500);
-  readfile(HTTP_500);
-  exit;
-}catch(Exception $e){
-  http_response_code(500);
-  readfile(HTTP_500);
+}catch(Throwable $e) {
+  \App\Error::render(500, \App\Error\Context::thrown('FR', $e));
   exit;
 }
