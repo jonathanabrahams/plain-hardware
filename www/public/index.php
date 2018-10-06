@@ -60,6 +60,6 @@ try {
       exit;
   }
 }catch(Throwable $e) {
-  \App\Error::render(500, \App\Error\Context::thrown('FR', $e));
+  \App\Error::render(501, \App\Error\Context::thrown('FR', $e));
   exit;
 }
