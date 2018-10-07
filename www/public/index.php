@@ -19,7 +19,7 @@ try {
     \App\Controller\Home::class => \DI\create(\App\Controller\Home::class),
     \App\Error::class => \DI\create(\App\Error::class)
   ]);
-  $buildr->enableCompilation(dirname(__DIR__).'/di.cache');
+  $builder->enableCompilation(dirname(__DIR__).'/di.cache');
   $app = $builder->build();
 }catch(Throwable $e) {
   \App\Error::render(501, \App\Error\Context::thrown('DI', $e));
