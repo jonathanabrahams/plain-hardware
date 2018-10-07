@@ -34,11 +34,14 @@ namespace App {
             }
             
             // Render Error Response
-            $accepted = self::acceptedTypes(self::acceptHeaderParser(), ['*','text']);
+            $accept_header = self::acceptHeaderParser();
+            $accepted = self::acceptedTypes($accept_header, ['text/html','application/json']);
+            var_dump($accepted);
             if( empty($accepted) ) {
                 \http_response_code(406);
                 exit;
             }
+            
             $err_file = self::HTTP_ERR_DIR.'/'.$errno.'.html';
             if( \file_exists($err_file) ){
                 readfile($err_file);
@@ -47,10 +50,11 @@ namespace App {
             }
         }
         
-        static function acceptHeaderParser()
+        static function acceptHeaderParser($header = null)
         {
+            $header = $header??$_SERVER['HTTP_ACCEPT'];
             $accept_types = [];
-            $accept = strtolower(str_replace(' ', '', $_SERVER['HTTP_ACCEPT']));
+            $accept = strtolower(str_replace(' ', '', $header));
             $accept = explode(',', $accept);
             foreach ($accept as $a) {
                 $q = 1;
@@ -62,12 +66,28 @@ namespace App {
             arsort($accept_types);
             return $accept_types;
         }
-
-        static function acceptedTypes($accept_types, $types)
+        static function acceptedTypes($accept_header, $acceptable_types)
         {
-            return array_filter(array_keys($accept_types), function($accept_type) {
-                list($type, $sub_type) = explode( '/', $accept_type);
-                return in_array($type, ['*', 'text']);
+            return array_filter($acceptable_types, function($type) use( &$accept_header) {
+                // Type/SubType checks
+                list($t, $st) = (array)explode('/',$type);
+                $ah = array_map(function($aht){ 
+                    return ($p = stripos($aht,';')) !== false ? substr($aht,0,$p) : $aht;
+                },array_keys($accept_header));
+            var_dump($ah);
+                // EXACT
+                if( array_key_exists($type, $accept_header) ){
+                    return true;
+                }
+                // Type/*
+                if( array_key_exists( $t.'/*', $accept_header) ) {
+                    return true;
+                }
+                // Any
+                if( array_key_exists('*/*', $accept_header) ) {
+                    return true;
+                }
+                return false;
             });
         }
     }
