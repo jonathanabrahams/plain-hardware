@@ -32,23 +32,21 @@ namespace App {
             if( $context ) {
                 self::header($context);
             }
-            http_response_code($errno);
-
-            // Render Error Page
-            $accept = self::acceptHeaderParser();
-            switch( true ) {
-                case array_key_exists('text/html', $accept): 
-                    $err_file = self::HTTP_ERR_DIR . '/'. $errno.'.html';
-                    break;
-                default: $err_file = self::HTTP_ERR_DIR . '/'. $errno.'.html';
+            
+            // Render Error Response
+            $accepted = self::acceptedTypes(self::acceptHeaderParser(), ['*','text']);
+            if( empty($accepted) ) {
+                \http_response_code(406);
+                exit;
             }
+            $err_file = self::HTTP_ERR_DIR.'/'.$errno.'.html';
             if( \file_exists($err_file) ){
                 readfile($err_file);
             } else {
                 echo $errno .':'. $context->getCode() . ':' . $context->getMessage();
             }
         }
-
+        
         static function acceptHeaderParser()
         {
             $accept_types = [];
@@ -63,6 +61,14 @@ namespace App {
             }
             arsort($accept_types);
             return $accept_types;
+        }
+
+        static function acceptedTypes($accept_types, $types)
+        {
+            return array_filter(array_keys($accept_types), function($accept_type) {
+                list($type, $sub_type) = explode( '/', $accept_type);
+                return in_array($type, ['*', 'text']);
+            });
         }
     }
 }
