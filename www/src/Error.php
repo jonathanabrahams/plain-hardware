@@ -34,9 +34,7 @@ namespace App {
             }
             
             // Render Error Response
-            $accept_header = self::acceptHeaderParser();
-            $accepted = self::acceptedTypes($accept_header, ['text/html','application/json']);
-            var_dump($accepted);
+            $accepted = self::acceptedTypes(['text/html','application/json']);
             if( empty($accepted) ) {
                 \http_response_code(406);
                 exit;
@@ -49,45 +47,10 @@ namespace App {
                 echo $errno .':'. $context->getCode() . ':' . $context->getMessage();
             }
         }
-        
-        static function acceptHeaderParser($header = null)
+        static function acceptedTypes($acceptable_types)
         {
-            $header = $header??$_SERVER['HTTP_ACCEPT'];
-            $accept_types = [];
-            $accept = strtolower(str_replace(' ', '', $header));
-            $accept = explode(',', $accept);
-            foreach ($accept as $a) {
-                $q = 1;
-                if (strpos($a, ';q=')) {
-                    list($a, $q) = explode(';q=', $a);
-                }
-                $accept_types[$a] = $q;
-            }
-            arsort($accept_types);
-            return $accept_types;
-        }
-        static function acceptedTypes($accept_header, $acceptable_types)
-        {
-            return array_filter($acceptable_types, function($type) use( &$accept_header) {
-                // Type/SubType checks
-                list($t, $st) = (array)explode('/',$type);
-                $ah = array_map(function($aht){ 
-                    return ($p = stripos($aht,';')) !== false ? substr($aht,0,$p) : $aht;
-                },array_keys($accept_header));
-            var_dump($ah);
-                // EXACT
-                if( array_key_exists($type, $accept_header) ){
-                    return true;
-                }
-                // Type/*
-                if( array_key_exists( $t.'/*', $accept_header) ) {
-                    return true;
-                }
-                // Any
-                if( array_key_exists('*/*', $accept_header) ) {
-                    return true;
-                }
-                return false;
+            return array_filter($acceptable_types,function($type){
+                return \App\Http\Accept::headers($_SERVER['HTTP_ACCEPT'])->hasType($type);
             });
         }
     }
