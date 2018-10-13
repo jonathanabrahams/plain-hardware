@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 namespace App\Controller;
 
-class Home {
-
-    public function __construct ()
+class Home
+{
+    public function __construct()
     {
         echo "HI";
     }

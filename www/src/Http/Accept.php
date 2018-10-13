@@ -1,20 +1,21 @@
 <?php namespace App\Http;
 
-class Accept {
-    private $headers;
+class Accept
+{
+    private $type;
+    private $sub_type;
+    private $q=1;
 
-    public function __construct($headers)
+    public function __construct($type, $sub_type, $q)
     {
-        $this->headers = $headers;
+        $this->type = $type;
+        $this->sub_type = $sub_type;
     }
 
-    static function headers($headers)
+    public static function create($accept)
     {
-        return new self($headers);
-    }
-
-    public function hasType($type)
-    {
-        return stripos($this->headers, $type) !== false;
+        $items = explode(';', $accept);
+        list($type, $sub_type) = explode('/', array_shift($items));
+        return new self($type, $sub_type, $items);
     }
 }

@@ -1,25 +1,27 @@
-<?php 
+<?php
 namespace App {
-    class Error {
+    class Error
+    {
+        const ERR_CONTEXT = 'EH';
         const HTTP_ERR_DIR = VIEW_DIR.'/error';
 
-        static function handler($errno, $errstr, $errfile, $errline)
+        public static function handler($errno, $errstr, $errfile, $errline)
         {
-            switch( true )
-            {
-                case ($errno & E_ERROR) != 0 : $type = 'Error'; break;
-                case ($errno & E_WARNING ) != 0 : $type = 'Warning'; break;
-                case ($errno & E_PARSE ) != 0 : $type = 'Parse'; break;
-                case ($errno & E_NOTICE ) != 0 : $type = 'Notice'; break;
+            switch (true) {
+                case ($errno & E_ERROR) != 0: $type = 'Error'; break;
+                case ($errno & E_WARNING) != 0: $type = 'Warning'; break;
+                case ($errno & E_PARSE) != 0: $type = 'Parse'; break;
+                case ($errno & E_NOTICE) != 0: $type = 'Notice'; break;
                 default: $type = 'Unknown';
             }
-            \App\Error::header(new \App\Error\Context('EH', $type, $errno, $errstr));
+            \App\Error::header(new \App\Error\Context(self::ERR_CONTEXT, $type, $errno, $errstr));
             return true;
         }
 
-        static function header(Error\Context $context)
+        public static function header(Error\Context $context)
         {
-            \header(sprintf('X-%s-%s: %s:%s', 
+            \header(sprintf(
+                'X-%s-%s: %s:%s',
                 $context->getContext(),
                 $context->getType(),
                 $context->getCode(),
@@ -27,36 +29,33 @@ namespace App {
             ));
         }
 
-        static function render($errno, Error\Context $context=null)
+        public static function render($errno, Error\Context $context=null)
         {
-            if( $context ) {
+            if ($context) {
                 self::header($context);
             }
             
             // Render Error Response
-            $accepted = self::acceptedTypes(['text/html','application/json']);
-            if( empty($accepted) ) {
+            $headers = \App\Http\Accept::headers($_SERVER['HTTP_ACCEPT']);
+            $select = $headers->select(['text/html','application/json']);
+            var_dump($select);
+            die();
+            if (empty($select)) {
                 \http_response_code(406);
                 exit;
             }
-            
             $err_file = self::HTTP_ERR_DIR.'/'.$errno.'.html';
-            if( \file_exists($err_file) ){
+            if (\file_exists($err_file)) {
                 readfile($err_file);
             } else {
                 echo $errno .':'. $context->getCode() . ':' . $context->getMessage();
             }
         }
-        static function acceptedTypes($acceptable_types)
-        {
-            return array_filter($acceptable_types,function($type){
-                return \App\Http\Accept::headers($_SERVER['HTTP_ACCEPT'])->hasType($type);
-            });
-        }
     }
 }
-namespace App\Error { 
-    class Context {
+namespace App\Error {
+    class Context
+    {
         private $context = "CTX";
         private $type = "T";
         private $code = 0;
@@ -70,7 +69,7 @@ namespace App\Error {
             $this->message = $message;
         }
 
-        static function thrown($context, \Throwable $e)
+        public static function thrown($context, \Throwable $e)
         {
             return new self($context, get_class($e), $e->getCode(), $e->getMessage());
         }
