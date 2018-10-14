@@ -3,28 +3,20 @@ use PHPUnit\Framework\TestCase;
 
 class AcceptTest extends TestCase
 {
-    public function standardHeader()
+    public function test_create_accept()
     {
-        return [
-            "standard" => ["text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"]
-        ];
-    }
-    /**
-     * @dataProvider standardHeader
-     */
-    public function test_create_accept($headers)
-    {
-        $sut =  \App\Http\AcceptHeader::create($headers);
-        $this->assertInstanceOf(\App\Http\AcceptHeader::class, $sut);
+        $sut =  new \App\Http\Accept("text", "html", 1);
+        $this->assertInstanceOf(\App\Http\Accept::class, $sut);
     }
 
-    /**
-     * @dataProvider standardHeader
-     */
-    public function test_list_headers($headers)
+    public function test_list_headers()
     {
-        $sut =  \App\Http\AcceptHeader::create($headers);
-        $accepts = $sut->accepts();
-        $this->assertEquals(["*/*"=>[]], $accepts[5]);
+        \App\Http\Accept::parse("*/*; q=1; level=3; version=1.2.3");
+        \App\Http\Accept::parse("*/html; q=1; level=3; version=1.2.3");
+        \App\Http\Accept::parse("text/*; q=1; level=3; version=1.2.3");
+        \App\Http\Accept::parse("text/html; q=1; level=3; version=1.2.3");
+        
+        \App\Http\Accept::parse("text/html");
+        \App\Http\Accept::parse("text/html;");
     }
 }
