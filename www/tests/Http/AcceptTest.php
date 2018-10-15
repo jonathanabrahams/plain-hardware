@@ -12,8 +12,8 @@ class AcceptTest extends TestCase
     public function test_list_headers()
     {
         \App\Http\Accept::parse("*/*; q=1; level=3; version=1.2.3");
-        \App\Http\Accept::parse("*/html; q=1; level=3; version=1.2.3");
-        \App\Http\Accept::parse("text/*; q=1; level=3; version=1.2.3");
+        \App\Http\Accept::parse("*/html; q=1; level=3; version=\"1.2.3\"");
+        \App\Http\Accept::parse("text/*; q=1; level=3; version=\"1.2.3\"");
         \App\Http\Accept::parse("text/html; q=1; level=3; version=1.2.3");
         
         \App\Http\Accept::parse("text/html");

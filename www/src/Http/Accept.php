@@ -41,7 +41,7 @@ class Accept
                 $has_tokens = preg_match_all("#;\s*(?<keys>[a-z]+)\s*=\s*(?<values>[^;]+)#i", $tokens, $match_tokens);
                 if ($has_tokens) {
                     $accepted[$media_range] = array_combine($match_tokens['keys'], array_map(function ($v) {
-                        return is_numeric($v) ? $v + 0 : trim($v);
+                        return is_numeric($v) ? $v + 0 : str_replace(["'", '"'], '', trim($v));
                     }, $match_tokens['values'])
                     );
                 } else {
