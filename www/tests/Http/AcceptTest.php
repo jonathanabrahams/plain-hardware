@@ -5,18 +5,24 @@ class AcceptTest extends TestCase
 {
     public function test_create_accept()
     {
-        $sut = new \App\Http\Accept("text", "html", 1);
+        $sut = new \App\Http\Accept("text/html", 1);
         $this->assertInstanceOf(\App\Http\Accept::class, $sut);
+    }
+
+    public function provideAcceptHeadersExceptions()
+    {
+        return [
+            [false, "text"]
+        ];
     }
 
     public function provideAcceptHeaders()
     {
         return [
-            [false, "text"],
-            [["text/html" => ["q" => 1]], "text/html"],
-            [["text/html" => ["version" => 1, "q" => 1]], "text/html;version=1"],
-            [["text/html" => ["version" => 1, "q" => 0.8]], "text/html;version=1;q=0.8"],
-            [["text/html" => ["q" => 0.9]], "text/html;q=0.9"],
+            [["text/html" , ["q" => 1]], "text/html"],
+            [["text/html" , ["version" => 1, "q" => 1]], "text/html;version=1"],
+            [["text/html" , ["version" => 1, "q" => 0.8]], "text/html;version=1;q=0.8"],
+            [["text/html" , ["q" => 0.9]], "text/html;q=0.9"],
         ];
     }
 
@@ -24,6 +30,15 @@ class AcceptTest extends TestCase
      * @dataProvider provideAcceptHeaders
      */
     public function test_list_headers($expected, $accept)
+    {
+        $result = \App\Http\Accept::parse($accept);
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * @dataProvider provideAcceptHeadersExceptions
+     */
+    public function test_exception_headers($expected, $accept)
     {
         $result = \App\Http\Accept::parse($accept);
         $this->assertEquals($expected, $result);

@@ -2,34 +2,80 @@
 
 class Accept
 {
-    private $type;
-    private $sub_type;
+    /**
+     * Media range
+     *
+     * Type/SubType
+     *
+     * @var string
+     */
+    private $media_range = 'text/html';
     /**
      * Quality Values
      *
-     * @var integer
+     * 0 - 1
+     *
+     * @var double
      */
     private $q = 1;
     /**
-     * Key/Value pair paraments
+     * Key/Value pair tokens
      *
      * @var array
      */
-    private $parameters = array();
+    private $tokens = array();
 
-    public function __construct($type, $sub_type, $q = 1, $parameters = [])
+    public function __construct($media_range, $q = 1, $tokens = [])
     {
-        $this->type = $type;
-        $this->sub_type = $sub_type;
-        $this->q = $q;
-        $this->parameters = $parameters;
+        $this->setMediaRange($media_range);
+        $this->setQuality($q);
+        $this->setTokens($tokens);
     }
 
-    public function accept()
+    public function setMediaRange($media_range)
     {
-        return $this->type . " " . $this->sub_type . " " . $this->q . " " . json_encode($this->parameters);
+        if (preg_match('#.*/.*#i', $media_range)) {
+            $this->media_range = $media_range;
+        } else {
+            throw new \Exception("Invalid media range format, should be TYPE/SUBTYPE");
+        }
+        return $this;
     }
 
+    public function setQuality($q)
+    {
+        if (\is_numeric($q) && $q >= 0 && $q <= 1) {
+            $this->q = \floatval($q);
+        } else {
+            throw new \OutOfBoundsException("Invalid quality, should be between 0 - 1");
+        }
+        return $this;
+    }
+
+    public function setTokens($tokens)
+    {
+        $this->tokens = $tokens;
+        return $this;
+    }
+
+    /**
+     * Create Accept
+     *
+     * @param [type] $accept
+     *
+     * @return void
+     */
+    public static function create($accept)
+    {
+        $parsed = self::parse($accept);
+        if ($parsed !== false) {
+            list($media_range, $tokens) = $parsed;
+            return new self($media_range, $tokens['q'], $tokens);
+        } else {
+            throw new \Exception('Could not parse accept');
+        }
+    }
+    
     public static function parse($accept)
     {
         // Parse media range
@@ -56,6 +102,6 @@ class Accept
                 $accepted = ["q" => 1];
             }
         }
-        return $found ? [$media_range => $accepted] : false;
+        return $found ? [$media_range, $accepted] : false;
     }
 }
