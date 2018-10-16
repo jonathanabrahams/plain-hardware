@@ -33,7 +33,7 @@ class Accept
     }
     public function validMediaRange($media_range)
     {
-        return preg_match('#.*/.*#i', $media_range);
+        return preg_match('#(\*/\*)|([a-z|\+]+/[a-z|\+|\*]+)#i', $media_range);
     }
     public function setMediaRange($media_range)
     {
@@ -97,7 +97,7 @@ class Accept
     public static function parse($accept)
     {
         // Parse media range
-        $found = \preg_match("#(?<media_range>(\*/\*)|([a-z]+/[a-z|\*]+))(?<tokens>.*)#i", strtolower($accept), $match);
+        $found = \preg_match("#(?<media_range>(\*/\*)|([a-z|\+]+/[a-z|\+|\*]+))(?<tokens>.*)#i", strtolower($accept), $match);
         if ($found) {
             // Parse tokens
             $media_range = $match['media_range'];

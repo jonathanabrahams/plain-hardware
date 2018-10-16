@@ -20,4 +20,15 @@ class AcceptHeaderTest extends TestCase
         $this->assertEquals('application/json', next($accepts)->getMediaRange());
         $this->assertEquals('text/xml', next($accepts)->getMediaRange());
     }
+
+    public function test_is_satisfied_by_accept()
+    {
+        $headers = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8';
+        $sut = \App\Http\AcceptHeader::create($headers);
+        $accepted = array_filter($sut->accepts(), function ($accept) {
+            return $accept->isSatisfiedBy('text/html');
+        });
+        $this->assertNotEmpty($accepted);
+        $this->assertEquals('text/html', current($accepted)->getMediaRange());
+    }
 }
