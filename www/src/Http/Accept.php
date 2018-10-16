@@ -31,10 +31,13 @@ class Accept
         $this->setQuality($q);
         $this->setTokens($tokens);
     }
-
+    public function validMediaRange($media_range)
+    {
+        return preg_match('#.*/.*#i', $media_range);
+    }
     public function setMediaRange($media_range)
     {
-        if (preg_match('#.*/.*#i', $media_range)) {
+        if ($this->validMediaRange($media_range)) {
             $this->media_range = $media_range;
         } else {
             throw new \Exception("Invalid media range format, should be TYPE/SUBTYPE");
@@ -118,5 +121,34 @@ class Accept
             }
         }
         return $found ? [$media_range, $accepted] : false;
+    }
+
+    public function isSatisfiedBy($accept)
+    {
+        if ($this->validMediaRange($accept)) {
+            list($test_type, $test_sub_type) = explode('/', $accept);
+            // Any
+            if ($test_type == '*' && $test_sub_type == '*') {
+                return true;
+            }
+            
+            list($type, $sub_type) = explode('/', $this->getMediaRange());
+            // Type
+            if (strcmp($test_type, $type) === 0) {
+                // Any SubType
+                if ($test_sub_type === '*') {
+                    return true;
+                }
+                // Exact SubType
+                else if (strcmp($test_sub_type, $sub_type) === 0) {
+                    return true;
+                }
+                // Invalid SubType
+                else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }

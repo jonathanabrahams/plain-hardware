@@ -57,4 +57,12 @@ class AcceptTest extends TestCase
         }
         $this->assertEquals($media_range, $result->getMediaRange());
     }
+
+    public function test_is_satisfied_by()
+    {
+        $sut = \App\Http\Accept::create('text/html;q=0.9');
+        $this->assertInstanceOf(\App\Http\Accept::class, $sut);
+        $this->assertTrue( $sut->isSatisfiedBy('text/html') );
+        $this->assertFalse( $sut->isSatisfiedBy('text/plain') );
+    }
 }
