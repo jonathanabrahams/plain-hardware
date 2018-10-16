@@ -41,23 +41,38 @@ class Accept
         }
         return $this;
     }
-
+    public function getMediaRange()
+    {
+        return $this->media_range;
+    }
     public function setQuality($q)
     {
         if (\is_numeric($q) && $q >= 0 && $q <= 1) {
-            $this->q = \floatval($q);
+            $this->q = $q;
         } else {
             throw new \OutOfBoundsException("Invalid quality, should be between 0 - 1");
         }
         return $this;
     }
-
+    public function getQuality()
+    {
+        return $this->q;
+    }
     public function setTokens($tokens)
     {
         $this->tokens = $tokens;
         return $this;
     }
 
+    public function getTokens()
+    {
+        return $this->tokens;
+    }
+
+    public function getToken($token)
+    {
+        return array_key_exists($token, $this->tokens) ? $this->tokens[$token] : null;
+    }
     /**
      * Create Accept
      *
@@ -75,7 +90,7 @@ class Accept
             throw new \Exception('Could not parse accept');
         }
     }
-    
+
     public static function parse($accept)
     {
         // Parse media range

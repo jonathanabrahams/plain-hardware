@@ -6,14 +6,13 @@ class AcceptHeader
 
     public function __construct($headers)
     {
-        $headers = explode(',', str_replace(' ', '', strtolower($headers)));
-        $params = array_map(
+        $accepts = array_map(
             function ($type) {
                 return Accept::create($type);
             },
-            $headers
+            explode(',', strtolower($headers))
         );
-        $this->headers = $params;
+        $this->accepts = self::sort($accepts);
     }
 
     public static function create($headers)
@@ -21,26 +20,31 @@ class AcceptHeader
         return new self($headers);
     }
 
+    public static function sort($accepts)
+    {
+        \uasort($accepts, function ($a, $b) {
+            return $a->getQuality() <=> $b->getQuality();
+        });
+        $keys = array_keys($accepts);
+        $q = array_map(function ($i) {return $i->getQuality();}, $accepts);
+        \array_multisort(
+            // First Quality
+            $q, \SORT_DESC,
+            // Then appeared i.e. key
+            $keys, \SORT_ASC,
+            // Sorts Accepts by Q then key
+            $accepts
+        );
+        return $accepts;
+    }
+
+    /**
+     * Accept
+     *
+     * @return \App\Htpp\Accept[]
+     */
     public function accepts()
     {
-        return $this->headers;
-    }
-}
-
-class Accept
-{
-    private $type;
-    private $sub_type;
-    private $q=1;
-
-    public function __construct($type, $sub_type, $q)
-    {
-    }
-
-    public static function create($accept)
-    {
-        $items = explode(';', $accept);
-        list($type, $sub_type) = explode('/', array_shift($items));
-        return new self($type, $sub_type, $items);
+        return $this->accepts;
     }
 }
