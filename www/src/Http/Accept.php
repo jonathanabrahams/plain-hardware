@@ -123,32 +123,45 @@ class Accept
         return $found ? [$media_range, $accepted] : false;
     }
 
-    public function isSatisfiedBy($accept)
+    /**
+     * Undocumented function
+     *
+     * @param array|string $accept
+     * @return boolean
+     */
+    public function isSatisfiedBy($accepts)
     {
-        if ($this->validMediaRange($accept)) {
-            list($test_type, $test_sub_type) = explode('/', $accept);
-            // Any
-            if ($test_type == '*' && $test_sub_type == '*') {
-                return true;
-            }
-            
-            list($type, $sub_type) = explode('/', $this->getMediaRange());
-            // Type
-            if (strcmp($test_type, $type) === 0) {
-                // Any SubType
-                if ($test_sub_type === '*') {
-                    return true;
+        $accepts = (array) $accepts;
+        $result = false;
+        foreach ($accepts as $accept) {
+            if ($this->validMediaRange($accept)) {
+                list($test_type, $test_sub_type) = explode('/', $accept);
+                // Any
+                if ($test_type == '*' && $test_sub_type == '*') {
+                    $result = true;
+                    break;
                 }
-                // Exact SubType
-                else if (strcmp($test_sub_type, $sub_type) === 0) {
-                    return true;
-                }
-                // Invalid SubType
-                else {
-                    return false;
+
+                list($type, $sub_type) = explode('/', $this->getMediaRange());
+                // Type
+                if (strcmp($test_type, $type) === 0) {
+                    // Any SubType
+                    if ($test_sub_type === '*') {
+                        $result = true;
+                        break;
+                    }
+                    // Exact SubType
+                    else if (strcmp($test_sub_type, $sub_type) === 0) {
+                        $result = true;
+                        break;
+                    }
+                    // Invalid SubType
+                    else {
+                        continue;
+                    }
                 }
             }
         }
-        return false;
+        return $result;
     }
 }

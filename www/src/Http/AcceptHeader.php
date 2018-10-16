@@ -19,7 +19,12 @@ class AcceptHeader
     {
         return new self($headers);
     }
-
+    public function filter($headers)
+    {
+        return array_filter($this->accepts, function ($accept) use ($headers) {
+            return $accept->isSatisfiedBy($headers);
+        });
+    }
     public static function sort($accepts)
     {
         \uasort($accepts, function ($a, $b) {
