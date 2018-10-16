@@ -64,5 +64,8 @@ class AcceptTest extends TestCase
         $this->assertInstanceOf(\App\Http\Accept::class, $sut);
         $this->assertTrue( $sut->isSatisfiedBy('text/html') );
         $this->assertFalse( $sut->isSatisfiedBy('text/plain') );
+        $this->assertTrue( $sut->isSatisfiedBy('text/*') );
+        $this->assertFalse( $sut->isSatisfiedBy('application/*') );
+        $this->assertTrue( $sut->isSatisfiedBy('*/*') );
     }
 }
